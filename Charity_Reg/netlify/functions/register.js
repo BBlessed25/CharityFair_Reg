@@ -25,7 +25,8 @@ export async function handler(event) {
       };
     }
 
-    // Send full registration payload for the sheet (all form fields + timestamp)
+    // Send full registration payload for the sheet (all form fields + timestamp).
+    // In Google Apps Script doPost(e), parse with: var data = JSON.parse(e.postData.contents);
     const sheetPayload = {
       timestamp: new Date().toISOString(),
       fullName: payload.fullName?.trim() ?? "",

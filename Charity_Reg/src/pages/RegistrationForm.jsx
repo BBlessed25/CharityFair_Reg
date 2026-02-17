@@ -241,7 +241,7 @@ export default function RegistrationForm() {
           <Card className="overflow-visible">
             <CardHeader className="text-center">
               <img
-                src="/logo.jpeg"
+                src="/logo1.jpeg"
                 alt="Gospel Pillars"
                 className="mx-auto w-24 h-24 rounded-full object-cover shadow-medium border-2 border-brand-100 dark:border-brand-800"
               />
