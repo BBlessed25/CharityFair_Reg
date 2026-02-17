@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand - warm reddish-brown from design */
+    --brand-50: 10 80% 98%;
+    --brand-100: 12 76% 94%;
+    --brand-200: 12 70% 88%;
+    --brand-300: 12 65% 78%;
+    --brand-400: 12 62% 65%;
+    --brand-500: 12 58% 52%;
+    --brand-600: 12 55% 45%;
+    --brand-700: 12 52% 38%;
+    --brand-800: 12 50% 32%;
+    --brand-900: 12 48% 26%;
+
+    /* Neutrals */
+    --background: 30 25% 98%;
+    --foreground: 220 15% 18%;
+    --card: 0 0% 100%;
+    --muted: 30 15% 92%;
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px rgba(0, 0, 0, 0.06), 0 4px 12px -4px rgba(0, 0, 0, 0.04);
+    --shadow-medium: 0 4px 16px -4px rgba(0, 0, 0, 0.08), 0 8px 24px -8px rgba(0, 0, 0, 0.06);
+    --shadow-hard: 0 8px 32px -8px rgba(0, 0, 0, 0.12), 0 16px 48px -16px rgba(0, 0, 0, 0.08);
+
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  .dark {
+    --background: 220 18% 10%;
+    --foreground: 30 15% 96%;
+    --card: 220 16% 14%;
+    --muted: 220 14% 20%;
+    --shadow-soft: 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+    --shadow-hard: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--brand-400));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--brand-500));
+  }
+
+  /* Selection */
+  ::selection {
+    background: hsl(var(--brand-200));
+    color: hsl(var(--brand-900));
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+@layer components {
+  /* Glass morphism */
+  .glass {
+    @apply bg-white/80 dark:bg-white/10 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-soft;
+  }
+}
+
+/* Print */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
