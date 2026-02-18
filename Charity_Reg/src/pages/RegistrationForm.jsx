@@ -93,6 +93,26 @@ const EVENT_DETAILS = [
   { icon: <TimeIcon />, label: 'Time', value: '10:00 AM (EST)' },
 ];
 
+const JACKET_SIZES = ['XXL', 'XL', 'L', 'M', 'S', 'XS'];
+
+const WELFARE_OPTS = [
+  'Yes, Please notify me by text (SMS)',
+  'Yes, Please notify me by email',
+  "No, I don't want to be notified",
+];
+
+const FORM_STEPS = [
+  { id: 'memberOrVisitor', label: 'Are you a Member or Visitor', type: 'radio', options: ['Member', 'Visitor'] },
+  { id: 'fullName', label: 'Full Name', type: 'text' },
+  { id: 'phone', label: 'Phone number', type: 'tel' },
+  { id: 'email', label: 'Email Address', type: 'email' },
+  { id: 'location', label: 'Location (City or Area)', type: 'text' },
+  { id: 'gender', label: 'Gender', type: 'radio', options: ['Male', 'Female'] },
+  { id: 'age', label: 'Age (18 & Above)', type: 'text', inputMode: 'numeric' },
+  { id: 'jacketSize', label: 'Jacket size', type: 'select', options: JACKET_SIZES },
+  { id: 'welfareUpdates', label: 'Would you like to receive updates about future welfare programs?', type: 'radio', options: WELFARE_OPTS },
+];
+
 const INITIAL_FORM = {
   fullName: '',
   phone: '',
@@ -100,6 +120,7 @@ const INITIAL_FORM = {
   location: '',
   gender: '',
   age: '',
+  jacketSize: '',
   memberOrVisitor: '',
   welfareUpdates: '',
 };
@@ -108,8 +129,31 @@ export default function RegistrationForm() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [activeSection, setActiveSection] = useState('header');
   const [submitting, setSubmitting] = useState(false);
+  const [formStep, setFormStep] = useState(0);
+  const [stepError, setStepError] = useState(null);
   const formRef = useRef(null);
   const rafRef = useRef(null);
+
+  const totalSteps = FORM_STEPS.length;
+  const isFirstStep = formStep === 0;
+  const isLastStep = formStep === totalSteps - 1;
+  const currentStepConfig = FORM_STEPS[formStep];
+
+  const goNext = () => {
+    setStepError(null);
+    if (currentStepConfig.id === 'age') {
+      const ageNum = parseInt(String(form.age ?? '').trim(), 10);
+      if (isNaN(ageNum) || ageNum < 18) {
+        setStepError('Please age must be at least 18');
+        return;
+      }
+    }
+    if (formStep < totalSteps - 1) setFormStep((s) => s + 1);
+  };
+  const goBack = () => {
+    setStepError(null);
+    if (formStep > 0) setFormStep((s) => s - 1);
+  };
 
   const updateActiveSectionFromScroll = useCallback(() => {
     const anchorY = window.innerHeight * ACTIVE_ANCHOR;
@@ -154,7 +198,11 @@ export default function RegistrationForm() {
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const validate = () => {
-    const required = ['fullName', 'phone', 'email', 'location', 'gender', 'age', 'memberOrVisitor', 'welfareUpdates'];
+    if (form.memberOrVisitor === 'Member') {
+      toast.error('Kindly reach out to your pastor for a separate link');
+      return false;
+    }
+    const required = ['fullName', 'phone', 'email', 'location', 'gender', 'age', 'jacketSize', 'memberOrVisitor', 'welfareUpdates'];
     for (const key of required) {
       if (!String(form[key] ?? '').trim()) {
         toast.error(`Please fill in ${key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}`);
@@ -164,6 +212,12 @@ export default function RegistrationForm() {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       toast.error('Please enter a valid email address.');
+      return false;
+    }
+    const ageNum = parseInt(form.age.trim(), 10);
+    if (isNaN(ageNum) || ageNum < 18) {
+      toast.error('Please age must be at least 18');
+      document.getElementById('age')?.focus?.();
       return false;
     }
     return true;
@@ -179,10 +233,16 @@ export default function RegistrationForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      const data = await res.json().catch(() => ({}));
+      let data = {};
+      try {
+        const raw = await res.text();
+        if (raw && raw.trim()) data = JSON.parse(raw);
+      } catch {
+        data = {};
+      }
       if (!res.ok || data.ok === false) {
-        const msg = data.error || 'Registration failed. Please try again.';
-        const friendlyMsg = /google script|GOOGLE_SCRIPT|not configured|not fully set up/i.test(msg)
+        const msg = data.error || (res.status ? `Registration failed (${res.status}). Please try again.` : 'Registration failed. Please try again.');
+        const friendlyMsg = /google script|GOOGLE_SCRIPT|not configured|not fully set up|unexpected response/i.test(msg)
           ? 'Registration is being set up. Please try again later or contact Gospel Pillars Church.'
           : msg;
         toast.error(friendlyMsg);
@@ -190,6 +250,7 @@ export default function RegistrationForm() {
       }
       toast.success('Registration submitted successfully. We look forward to seeing you!');
       setForm(INITIAL_FORM);
+      setFormStep(0);
     } catch {
       toast.error('Something went wrong. Please try again.');
     } finally {
@@ -261,7 +322,7 @@ export default function RegistrationForm() {
             <CardContent className="space-y-4 text-left">
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 On Sunday 22nd February 2026, Gospel Pillars Church Toronto will be giving out{' '}
-                <strong>free groceries, food items and clothing.</strong>
+                <strong>50 free winter jackets and winter accessories.</strong>
               </p>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 Kindly register to receive yours by completing the form below.
@@ -269,7 +330,7 @@ export default function RegistrationForm() {
               <p className="font-semibold text-gray-900 dark:text-white">Please Note;</p>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                 <li>
-                  <strong>Registration closes on Friday, 20th February 2026 at 6:00pm EST.</strong>
+                  <strong>The items will be given to the first 50 adult persons to register.</strong>
                 </li>
                 <li>
                   <strong>Items will be given only to those who are physically present.</strong>
@@ -297,118 +358,113 @@ export default function RegistrationForm() {
           style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
         >
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-            {[
-              { id: 'fullName', label: 'Full Name', type: 'text', required: true },
-              { id: 'phone', label: 'Phone number', type: 'tel', required: true },
-              { id: 'email', label: 'Email Address', type: 'email', required: true },
-              { id: 'location', label: 'Location (City or Area)', type: 'text', required: true },
-            ].map(({ id, label, type, required }) => (
-              <Card key={id} className="p-5">
-                <label htmlFor={id} className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                  {label} {required && <span className="text-red-500">*</span>}
-                </label>
-                <input
-                  id={id}
-                  type={type}
-                  value={form[id]}
-                  onChange={(e) => update(id, e.target.value)}
-                  placeholder="Your answer"
-                  className="w-full bg-transparent border-0 border-b border-gray-300 dark:border-gray-600 focus:border-brand-500 focus:ring-0 py-2 text-gray-900 dark:text-white placeholder-gray-400 form-input rounded-none"
-                  required={required}
-                />
-              </Card>
-            ))}
-
-            <Card className="p-5">
-              <span className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                Gender <span className="text-red-500">*</span>
-              </span>
-              <div className="space-y-2">
-                {['Male', 'Female'].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value={opt}
-                      checked={form.gender === opt}
-                      onChange={() => update('gender', opt)}
-                      className="text-brand-600 border-gray-300 focus:ring-brand-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-5">
-              <label htmlFor="age" className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                Age <span className="text-red-500">*</span>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              Question {formStep + 1} of {totalSteps}
+            </p>
+            <Card className="p-6 min-h-[200px] flex flex-col">
+              <label className="block text-base font-semibold text-gray-900 dark:text-white mb-4">
+                {currentStepConfig.label} <span className="text-red-500">*</span>
               </label>
-              <input
-                id="age"
-                type="text"
-                inputMode="numeric"
-                value={form.age}
-                onChange={(e) => update('age', e.target.value)}
-                placeholder="Your answer"
-                className="w-full bg-transparent border-0 border-b border-gray-300 dark:border-gray-600 focus:border-brand-500 focus:ring-0 py-2 text-gray-900 dark:text-white placeholder-gray-400 form-input rounded-none"
-                required
-              />
+
+              {currentStepConfig.type === 'radio' && (
+                <div className="space-y-3 flex-1">
+                  {currentStepConfig.options.map((opt) => (
+                    <label key={opt} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg hover:bg-brand-50 dark:hover:bg-brand-900/20">
+                      <input
+                        type="radio"
+                        name={currentStepConfig.id}
+                        value={opt}
+                        checked={form[currentStepConfig.id] === opt}
+                        onChange={() => {
+                          update(currentStepConfig.id, opt);
+                          if (currentStepConfig.id === 'memberOrVisitor') {
+                            if (opt === 'Member') {
+                              setStepError('Kindly reach out to your pastor for a separate link');
+                              return;
+                            }
+                            setStepError(null);
+                          }
+                          if (!isLastStep) goNext();
+                        }}
+                        className="text-brand-600 border-gray-300 focus:ring-brand-500"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {currentStepConfig.type === 'select' && (
+                <select
+                  id={currentStepConfig.id}
+                  value={form[currentStepConfig.id]}
+                  onChange={(e) => {
+                    update(currentStepConfig.id, e.target.value);
+                    if (!isLastStep) goNext();
+                  }}
+                  className="w-full bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-600 focus:border-brand-500 focus:ring-0 py-3 text-gray-900 dark:text-white form-select rounded-none text-base"
+                >
+                  <option value="">Select option</option>
+                  {currentStepConfig.options.map((size) => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              )}
+
+              {(currentStepConfig.type === 'text' || currentStepConfig.type === 'tel' || currentStepConfig.type === 'email') && (
+                <div className="flex-1 flex flex-col gap-4">
+                  <input
+                    id={currentStepConfig.id}
+                    type={currentStepConfig.type}
+                    inputMode={currentStepConfig.inputMode || 'text'}
+                    value={form[currentStepConfig.id]}
+                    onChange={(e) => {
+                      update(currentStepConfig.id, e.target.value);
+                      if (currentStepConfig.id === 'age') setStepError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (String(form[currentStepConfig.id] ?? '').trim()) goNext();
+                      }
+                    }}
+                    placeholder="Your answer"
+                    className="w-full bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-600 focus:border-brand-500 focus:ring-0 py-3 text-gray-900 dark:text-white placeholder-gray-400 form-input rounded-none text-base"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    onClick={goNext}
+                    disabled={!String(form[currentStepConfig.id] ?? '').trim()}
+                    size="lg"
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+              {stepError && (
+                <p className="text-red-600 dark:text-red-400 text-sm mt-4 text-left" role="alert">
+                  {stepError}
+                </p>
+              )}
             </Card>
 
-            <Card className="p-5">
-              <span className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                Are you a Member or Visitor <span className="text-red-500">*</span>
-              </span>
-              <div className="space-y-2">
-                {['Member', 'Visitor'].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="memberOrVisitor"
-                      value={opt}
-                      checked={form.memberOrVisitor === opt}
-                      onChange={() => update('memberOrVisitor', opt)}
-                      className="text-brand-600 border-gray-300 focus:ring-brand-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                  </label>
-                ))}
+            <CardFooter className="flex items-center justify-between gap-4 pt-2">
+              <div className="flex items-center gap-3">
+                {!isFirstStep && (
+                  <Button type="button" variant="outline" size="lg" onClick={goBack}>
+                    Back
+                  </Button>
+                )}
+                {isLastStep && (
+                  <Button type="submit" size="lg" disabled={submitting}>
+                    {submitting ? 'Submitting…' : 'Submit'}
+                  </Button>
+                )}
               </div>
-            </Card>
-
-            <Card className="p-5">
-              <span className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                Would you like to receive updates about future welfare programs? <span className="text-red-500">*</span>
-              </span>
-              <div className="space-y-2">
-                {[
-                  'Yes, Please notify me by text (SMS)',
-                  'Yes, Please notify me by email',
-                  "No, I don't want to be notified",
-                ].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="welfareUpdates"
-                      value={opt}
-                      checked={form.welfareUpdates === opt}
-                      onChange={() => update('welfareUpdates', opt)}
-                      className="text-brand-600 border-gray-300 focus:ring-brand-500"
-                    />
-                    <span className="text-gray-700 dark:text-gray-300">{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </Card>
-
-            <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-              <Button type="submit" size="lg" disabled={submitting}>
-                {submitting ? 'Submitting…' : 'Submit'}
-              </Button>
               <button
                 type="button"
-                onClick={handleClear}
+                onClick={() => { setForm(INITIAL_FORM); setFormStep(0); toast('Form cleared.'); }}
                 className="text-brand-600 dark:text-brand-400 hover:underline font-medium text-sm"
               >
                 Clear form

@@ -27,6 +27,7 @@ export async function handler(event) {
 
     // Send full registration payload for the sheet (all form fields + timestamp).
     // In Google Apps Script doPost(e), parse with: var data = JSON.parse(e.postData.contents);
+    // Enforce max 51 registrations in the script; return { ok: false, error: "..." } when full.
     const sheetPayload = {
       timestamp: new Date().toISOString(),
       fullName: payload.fullName?.trim() ?? "",
@@ -35,6 +36,7 @@ export async function handler(event) {
       location: payload.location?.trim() ?? "",
       gender: payload.gender ?? "",
       age: payload.age?.trim() ?? "",
+      jacketSize: payload.jacketSize ?? "",
       memberOrVisitor: payload.memberOrVisitor ?? "",
       welfareUpdates: payload.welfareUpdates ?? "",
     };
@@ -46,10 +48,25 @@ export async function handler(event) {
     });
 
     const text = await res.text();
-    const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
+    let data = {};
+    try {
+      if (text && text.trim()) data = JSON.parse(text);
+    } catch {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          ok: false,
+          error: "Google Apps Script returned an unexpected response. Check that the script is deployed as a web app and returns JSON.",
+        }),
+      };
+    }
 
     if (!res.ok) {
-      const message = data.error || (res.status === 404 ? "Registration endpoint not configured. Please contact the organizer." : `Server error (${res.status}). Please try again later.`);
+      const message =
+        data.error ||
+        (res.status === 404
+          ? "Registration endpoint not configured. Please contact the organizer."
+          : `Server error (${res.status}). Please try again later.`);
       return {
         statusCode: 500,
         body: JSON.stringify({ ok: false, error: message }),
@@ -59,7 +76,10 @@ export async function handler(event) {
     if (data.ok === false) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ ok: false, error: data.error || "Registration could not be saved. Please try again." }),
+        body: JSON.stringify({
+          ok: false,
+          error: data.error || "Registration could not be saved. Please try again.",
+        }),
       };
     }
 
