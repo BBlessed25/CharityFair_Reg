@@ -322,7 +322,7 @@ export default function RegistrationForm() {
             <CardContent className="space-y-4 text-left">
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 On Sunday 22nd February 2026, Gospel Pillars Church Toronto will be giving out{' '}
-                <strong>50 free winter jackets and winter accessories.</strong>
+                <strong>50 Free Spring Jackets & Accessories</strong>
               </p>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 Kindly register to receive yours by completing the form below.
