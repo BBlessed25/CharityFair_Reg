@@ -113,6 +113,9 @@ const FORM_STEPS = [
   { id: 'welfareUpdates', label: 'Would you like to receive updates about future welfare programs?', type: 'radio', options: WELFARE_OPTS },
 ];
 
+/** Set to true to allow form submissions; false to block. */
+const SUBMISSIONS_ENABLED = false;
+
 const INITIAL_FORM = {
   fullName: '',
   phone: '',
@@ -225,6 +228,10 @@ export default function RegistrationForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!SUBMISSIONS_ENABLED) {
+      toast.error('Registration submissions are currently closed.');
+      return;
+    }
     if (!validate()) return;
     setSubmitting(true);
     try {
@@ -457,7 +464,7 @@ export default function RegistrationForm() {
                   </Button>
                 )}
                 {isLastStep && (
-                  <Button type="submit" size="lg" disabled={submitting}>
+                  <Button type="submit" size="lg" disabled={submitting || !SUBMISSIONS_ENABLED}>
                     {submitting ? 'Submitting…' : 'Submit'}
                   </Button>
                 )}
