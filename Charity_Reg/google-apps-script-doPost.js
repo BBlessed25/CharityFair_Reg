@@ -26,7 +26,6 @@ function doPost(e) {
       body.address || "",
       body.gender || "",
       body.uciNumber || "",
-      body.memberOrVisitor || "",
       body.howDidYouKnow || "",
     ]);
 

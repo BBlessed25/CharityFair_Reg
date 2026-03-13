@@ -100,7 +100,6 @@ const FORM_STEPS = [
   { id: 'address', label: 'Address', type: 'text' },
   { id: 'gender', label: 'Gender', type: 'radio', options: ['Male', 'Female'] },
   { id: 'uciNumber', label: 'UCI Number', type: 'text' },
-  { id: 'memberOrVisitor', label: 'Are you a member or visitor?', type: 'radio', options: ['Member', 'Visitor'] },
   { id: 'howDidYouKnow', label: 'How did you come to know about this initiative?', type: 'text' },
 ];
 
@@ -114,7 +113,6 @@ const INITIAL_FORM = {
   address: '',
   gender: '',
   uciNumber: '',
-  memberOrVisitor: '',
   howDidYouKnow: '',
 };
 
@@ -184,7 +182,7 @@ export default function RegistrationForm() {
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const validate = () => {
-    const required = ['fullName', 'phone', 'email', 'address', 'gender', 'uciNumber', 'memberOrVisitor', 'howDidYouKnow'];
+    const required = ['fullName', 'phone', 'email', 'address', 'gender', 'uciNumber', 'howDidYouKnow'];
     for (const key of required) {
       if (!String(form[key] ?? '').trim()) {
         toast.error(`Please fill in ${key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}`);
@@ -223,7 +221,7 @@ export default function RegistrationForm() {
       if (!res.ok || data.ok === false) {
         const msg = data.error || (res.status ? `Registration failed (${res.status}). Please try again.` : 'Registration failed. Please try again.');
         const friendlyMsg = /google script|GOOGLE_SCRIPT|not configured|not fully set up|unexpected response/i.test(msg)
-          ? 'Registration is being set up. Please try again later or contact Gospel Pillars Church.'
+          ? 'Registration is being set up. Please try again later or contact OneSound Charity Canada.'
           : msg;
         toast.error(friendlyMsg);
         return;

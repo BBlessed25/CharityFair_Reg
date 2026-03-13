@@ -21,7 +21,7 @@ export async function handler(event) {
     if (!scriptUrl) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ ok: false, error: "Registration is not fully set up yet. Please try again later or contact the church." }),
+        body: JSON.stringify({ ok: false, error: "Registration is not fully set up yet. Please try again later or contact OneSound Charity Canada." }),
       };
     }
 
@@ -35,7 +35,6 @@ export async function handler(event) {
       address: payload.address?.trim() ?? "",
       gender: payload.gender ?? "",
       uciNumber: payload.uciNumber?.trim() ?? "",
-      memberOrVisitor: payload.memberOrVisitor ?? "",
       howDidYouKnow: payload.howDidYouKnow?.trim() ?? "",
     };
 
