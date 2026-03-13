@@ -294,7 +294,7 @@ export default function RegistrationForm() {
                 className="mx-auto w-24 h-24 rounded-full object-cover shadow-medium border-2 border-brand-100 dark:border-brand-800"
               />
               <h1 className="mt-4 text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                IFHP Awareness Initiative
+                OneSound-JGLF
               </h1>
             </CardHeader>
             <CardContent className="space-y-4 text-left">
