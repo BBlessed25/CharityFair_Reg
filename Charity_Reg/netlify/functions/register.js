@@ -27,18 +27,16 @@ export async function handler(event) {
 
     // Send full registration payload for the sheet (all form fields + timestamp).
     // In Google Apps Script doPost(e), parse with: var data = JSON.parse(e.postData.contents);
-    // Enforce max 50 registrations in the script; return { ok: false, error: "..." } when full.
     const sheetPayload = {
       timestamp: new Date().toISOString(),
       fullName: payload.fullName?.trim() ?? "",
       phone: payload.phone?.trim() ?? "",
       email: payload.email?.trim() ?? "",
-      location: payload.location?.trim() ?? "",
+      address: payload.address?.trim() ?? "",
       gender: payload.gender ?? "",
-      age: payload.age?.trim() ?? "",
-      jacketSize: payload.jacketSize ?? "",
+      uciNumber: payload.uciNumber?.trim() ?? "",
       memberOrVisitor: payload.memberOrVisitor ?? "",
-      welfareUpdates: payload.welfareUpdates ?? "",
+      howDidYouKnow: payload.howDidYouKnow?.trim() ?? "",
     };
 
     const res = await fetch(scriptUrl, {

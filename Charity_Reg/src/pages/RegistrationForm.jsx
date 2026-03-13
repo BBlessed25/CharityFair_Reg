@@ -93,24 +93,15 @@ const EVENT_DETAILS = [
   { icon: <TimeIcon />, label: 'Time', value: '10:00 AM (EST)' },
 ];
 
-const JACKET_SIZES = ['XXL', 'XL', 'L', 'M', 'S', 'XS'];
-
-const WELFARE_OPTS = [
-  'Yes, Please notify me by text (SMS)',
-  'Yes, Please notify me by email',
-  "No, I don't want to be notified",
-];
-
 const FORM_STEPS = [
-  { id: 'memberOrVisitor', label: 'Are you a Member or Visitor', type: 'radio', options: ['Member', 'Visitor'] },
-  { id: 'fullName', label: 'Full Name', type: 'text' },
+  { id: 'fullName', label: 'Name', type: 'text' },
   { id: 'phone', label: 'Phone number', type: 'tel' },
-  { id: 'email', label: 'Email Address', type: 'email' },
-  { id: 'location', label: 'Location (City or Area)', type: 'text' },
+  { id: 'email', label: 'Email address', type: 'email' },
+  { id: 'address', label: 'Address', type: 'text' },
   { id: 'gender', label: 'Gender', type: 'radio', options: ['Male', 'Female'] },
-  { id: 'age', label: 'Age (18 & Above)', type: 'text', inputMode: 'numeric' },
-  { id: 'jacketSize', label: 'Jacket size', type: 'select', options: JACKET_SIZES },
-  { id: 'welfareUpdates', label: 'Would you like to receive updates about future welfare programs?', type: 'radio', options: WELFARE_OPTS },
+  { id: 'uciNumber', label: 'UCI Number', type: 'text' },
+  { id: 'memberOrVisitor', label: 'Are you a member or visitor?', type: 'radio', options: ['Member', 'Visitor'] },
+  { id: 'howDidYouKnow', label: 'How did you come to know about this initiative?', type: 'text' },
 ];
 
 /** Set to true to allow form submissions; false to block. */
@@ -120,12 +111,11 @@ const INITIAL_FORM = {
   fullName: '',
   phone: '',
   email: '',
-  location: '',
+  address: '',
   gender: '',
-  age: '',
-  jacketSize: '',
+  uciNumber: '',
   memberOrVisitor: '',
-  welfareUpdates: '',
+  howDidYouKnow: '',
 };
 
 export default function RegistrationForm() {
@@ -144,13 +134,6 @@ export default function RegistrationForm() {
 
   const goNext = () => {
     setStepError(null);
-    if (currentStepConfig.id === 'age') {
-      const ageNum = parseInt(String(form.age ?? '').trim(), 10);
-      if (isNaN(ageNum) || ageNum < 18) {
-        setStepError('Please age must be at least 18');
-        return;
-      }
-    }
     if (formStep < totalSteps - 1) setFormStep((s) => s + 1);
   };
   const goBack = () => {
@@ -201,11 +184,7 @@ export default function RegistrationForm() {
   const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const validate = () => {
-    if (form.memberOrVisitor === 'Member') {
-      toast.error('Kindly reach out to your pastor for a separate link');
-      return false;
-    }
-    const required = ['fullName', 'phone', 'email', 'location', 'gender', 'age', 'jacketSize', 'memberOrVisitor', 'welfareUpdates'];
+    const required = ['fullName', 'phone', 'email', 'address', 'gender', 'uciNumber', 'memberOrVisitor', 'howDidYouKnow'];
     for (const key of required) {
       if (!String(form[key] ?? '').trim()) {
         toast.error(`Please fill in ${key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}`);
@@ -215,12 +194,6 @@ export default function RegistrationForm() {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       toast.error('Please enter a valid email address.');
-      return false;
-    }
-    const ageNum = parseInt(form.age.trim(), 10);
-    if (isNaN(ageNum) || ageNum < 18) {
-      toast.error('Please age must be at least 18');
-      document.getElementById('age')?.focus?.();
       return false;
     }
     return true;
@@ -275,7 +248,7 @@ export default function RegistrationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-50/50 to-white dark:from-gray-900 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-amber-100 via-amber-50 to-amber-200/90 dark:from-amber-900/40 dark:via-amber-950/30 dark:to-gray-900">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
 
       {/* Sticky nav - logo left, section buttons right */}
@@ -323,37 +296,34 @@ export default function RegistrationForm() {
                 className="mx-auto w-24 h-24 rounded-full object-cover shadow-medium border-2 border-brand-100 dark:border-brand-800"
               />
               <h1 className="mt-4 text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                Charity Fair Registration Form
+                IFHP Awareness Initiative
               </h1>
             </CardHeader>
             <CardContent className="space-y-4 text-left">
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                On Sunday 22nd February 2026, Gospel Pillars Church Toronto will be giving out{' '}
-                <strong>50 Free Spring Jackets & Accessories</strong>
+                OneSound Charity Canada, in collaboration with Joy Givers Love Foundation, is supporting eligible asylum seekers in accessing a small incentive opportunity connected to outreach under the Interim Federal Health Program (IFHP) awareness initiative, courtesy of Vitality Health.
               </p>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                Kindly register to receive yours by completing the form below.
+                This form is designed to collect basic information from individuals who may qualify for participation. Eligible individuals may receive $100 after verification, depending on program eligibility criteria.
               </p>
-              <p className="font-semibold text-gray-900 dark:text-white">Please Note;</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Eligibility Requirements</p>
+              <p className="text-gray-700 dark:text-gray-300">Participants must:</p>
               <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
-                <li>
-                  <strong>The items will be given to the first 50 adult persons to register.</strong>
-                </li>
-                <li>
-                  <strong>Items will be given only to those who are physically present.</strong>
-                </li>
+                <li>Be asylum seekers in Canada</li>
+                <li>Have entered Canada between 2024 and 2026</li>
+                <li>Be between the ages of 14 and 100</li>
+                <li>Have an active UCI (Unique Client Identifier)</li>
               </ul>
-              <hr className="border-gray-200 dark:border-gray-700" />
-              <div className="space-y-3">
-                {EVENT_DETAILS.map(({ icon, label, value }) => (
-                  <p key={label} className="flex gap-2 text-gray-700 dark:text-gray-300">
-                    <span aria-hidden>{icon}</span>
-                    <span>
-                      <strong>{label}:</strong> {value}
-                    </span>
-                  </p>
-                ))}
-              </div>
+              <p className="font-semibold text-gray-900 dark:text-white mt-4">Information Requested</p>
+              <p className="text-gray-700 dark:text-gray-300">To determine eligibility, we will request:</p>
+              <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                <li>Name</li>
+                <li>Phone Number</li>
+                <li>Email Address</li>
+                <li>Address</li>
+                <li>Gender</li>
+                <li>UCI Number</li>
+              </ul>
             </CardContent>
           </Card>
         </section>
@@ -384,13 +354,6 @@ export default function RegistrationForm() {
                         checked={form[currentStepConfig.id] === opt}
                         onChange={() => {
                           update(currentStepConfig.id, opt);
-                          if (currentStepConfig.id === 'memberOrVisitor') {
-                            if (opt === 'Member') {
-                              setStepError('Kindly reach out to your pastor for a separate link');
-                              return;
-                            }
-                            setStepError(null);
-                          }
                           if (!isLastStep) goNext();
                         }}
                         className="text-brand-600 border-gray-300 focus:ring-brand-500"
@@ -425,10 +388,7 @@ export default function RegistrationForm() {
                     type={currentStepConfig.type}
                     inputMode={currentStepConfig.inputMode || 'text'}
                     value={form[currentStepConfig.id]}
-                    onChange={(e) => {
-                      update(currentStepConfig.id, e.target.value);
-                      if (currentStepConfig.id === 'age') setStepError(null);
-                    }}
+                    onChange={(e) => update(currentStepConfig.id, e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -479,6 +439,27 @@ export default function RegistrationForm() {
             </CardFooter>
           </form>
         </section>
+
+        <footer className="mt-12 pt-8 pb-16 border-t border-gray-200 dark:border-gray-700 text-center">
+          <div className="space-y-4 text-sm text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            <p className="font-semibold text-gray-900 dark:text-white">Privacy Notice</p>
+            <p className="leading-relaxed">
+              The information you provide will be used only for eligibility verification and communication regarding this opportunity. It will be handled confidentially and shared only with authorized partners supporting this initiative.
+            </p>
+            <p className="leading-relaxed">
+              Submitting this form does not guarantee payment, but it allows our team to review your eligibility.
+            </p>
+            <p className="leading-relaxed">
+              If you have questions, you may contact our team through OneSound Charity Canada.
+            </p>
+            <p className="leading-relaxed font-medium text-gray-700 dark:text-gray-300">
+              Thank you for your interest.
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 pt-4">
+              © 2026
+            </p>
+          </div>
+        </footer>
       </main>
     </div>
   );

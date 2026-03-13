@@ -1,12 +1,11 @@
 /**
  * Google Apps Script: doPost(e) for Charity Fair registration (Netlify register function).
  * Deploy as Web app (Execute as: Me, Who has access: Anyone).
- * Uses your spreadsheet and sheet "HicDataBase". Enforces max 50 registrations.
+ * Uses your spreadsheet and sheet "HicDataBase".
  */
 
 var SPREADSHEET_ID = "1vLOkEOQcmtvjf4yHqD95OMB3p_DjQ8Ce5a_0lqgU0aY";
 var SHEET_NAME = "HicDataBase";
-var MAX_REGISTRATIONS = 50;
 
 function doPost(e) {
   try {
@@ -18,28 +17,17 @@ function doPost(e) {
       sheet = ss.insertSheet(SHEET_NAME);
     }
 
-    // Row 1 = header, so 50 data rows = up to row 51
-    if (sheet.getLastRow() >= MAX_REGISTRATIONS + 1) {
-      return ContentService
-        .createTextOutput(JSON.stringify({
-          ok: false,
-          error: "Registration is full. We have reached the maximum of 50 registrations.",
-        }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Charity Fair payload from Netlify register function
+    // IFHP Awareness Initiative payload from Netlify register function
     sheet.appendRow([
       body.timestamp || new Date(),
       body.fullName || "",
       body.phone || "",
       body.email || "",
-      body.location || "",
+      body.address || "",
       body.gender || "",
-      body.age || "",
-      body.jacketSize || "",
+      body.uciNumber || "",
       body.memberOrVisitor || "",
-      body.welfareUpdates || "",
+      body.howDidYouKnow || "",
     ]);
 
     return ContentService

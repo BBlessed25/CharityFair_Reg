@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 /**
  * @param {{ title?: string; description?: string; image?: string; url?: string; type?: string }} props
  */
-export function SEO({ title = 'Charity Fair Registration | Gospel Pillars Church Toronto', description, image, url, type = 'website' }) {
+export function SEO({ title = 'IFHP Awareness Initiative', description, image, url, type = 'website' }) {
   const desc = description ?? 'Register for free groceries, food items and clothing at Gospel Pillars Church Toronto. Sunday 22nd February 2026.';
   const img = image ?? (typeof window !== 'undefined' ? `${window.location.origin}/logo1.jpeg` : '/logo1.jpeg');
   const canonical = url ?? (typeof window !== 'undefined' ? window.location.href : '');
