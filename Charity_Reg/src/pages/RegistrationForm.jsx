@@ -105,7 +105,7 @@ const FORM_STEPS = [
 ];
 
 /** Set to true to allow form submissions; false to block. */
-const SUBMISSIONS_ENABLED = false;
+const SUBMISSIONS_ENABLED = true;
 
 const INITIAL_FORM = {
   fullName: '',
@@ -392,21 +392,33 @@ export default function RegistrationForm() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        if (String(form[currentStepConfig.id] ?? '').trim()) goNext();
+                        const trimmed = String(form[currentStepConfig.id] ?? '').trim();
+                        if (trimmed && isLastStep) formRef.current?.requestSubmit?.();
+                        else if (trimmed) goNext();
                       }
                     }}
                     placeholder="Your answer"
                     className="w-full bg-transparent border-0 border-b-2 border-gray-300 dark:border-gray-600 focus:border-brand-500 focus:ring-0 py-3 text-gray-900 dark:text-white placeholder-gray-400 form-input rounded-none text-base"
                     autoFocus
                   />
-                  <Button
-                    type="button"
-                    onClick={goNext}
-                    disabled={!String(form[currentStepConfig.id] ?? '').trim()}
-                    size="lg"
-                  >
-                    Next
-                  </Button>
+                  {isLastStep ? (
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={!String(form[currentStepConfig.id] ?? '').trim() || submitting}
+                    >
+                      {submitting ? 'Submitting…' : 'Submit'}
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={goNext}
+                      disabled={!String(form[currentStepConfig.id] ?? '').trim()}
+                      size="lg"
+                    >
+                      Next
+                    </Button>
+                  )}
                 </div>
               )}
               {stepError && (
